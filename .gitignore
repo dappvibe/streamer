@@ -1,0 +1,4 @@
+.env
+hls_data/
+*.log
+.idea/
