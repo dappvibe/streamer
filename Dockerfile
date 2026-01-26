@@ -25,9 +25,6 @@ RUN mkdir -p /data
 # Environment variables needed for build
 ENV DATABASE_PATH=/data/db.sqlite
 
-# Build the application
-RUN npm run build
-
 # Runtime Environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
