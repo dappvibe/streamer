@@ -75,8 +75,7 @@ DOMAIN=$(echo "$NEXT_PUBLIC_APP_URL" | sed -e 's|^[^/]*//||' -e 's|:.*$||' -e 's
 
 if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "localhost" ] && [ -n "$EMAIL" ]; then
     echo "Configuring Let's Encrypt for $DOMAIN..."
-    
-    # Check if certs already exist
+
     if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
         echo "Existing certificates found."
         export SSL_KEY_PATH="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
