@@ -13,12 +13,20 @@ export interface Stream {
 }
 
 export function generateConfig(template: string, streams: Stream[]): string {
+  const ingestKey = process.env.INGEST_KEY;
+  if (!ingestKey) {
+    throw new Error('INGEST_KEY is not defined');
+  }
+
   const pushLines = streams
     .filter(s => s.enabled)
     .map(s => `            push "${s.rtmpUrl}/${s.streamKey}";`)
     .join('\n');
 
-  return template.replace('{{PUSH_DESTINATIONS}}', pushLines || '            # No destinations configured');
+  let config = template.replace('{{PUSH_DESTINATIONS}}', pushLines || '            # No destinations configured');
+  config = config.replace('{{INGEST_KEY}}', ingestKey);
+
+  return config;
 }
 
 export function writeConfig(config: string): void {

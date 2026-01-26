@@ -16,7 +16,7 @@ rtmp {
         listen 1935;
         chunk_size 4096;
 
-        application live {
+        application {{INGEST_KEY}} {
             live on;
             on_publish http://127.0.0.1:3000/api/auth/stream;
 
@@ -133,7 +133,10 @@ async function seed() {
 
   const existingIngestKey = sqlite.prepare('SELECT value FROM settings WHERE key = ?').get('ingest_key');
   if (!existingIngestKey) {
-    const defaultKey = process.env.INGEST_KEY || crypto.randomBytes(16).toString('hex');
+    const defaultKey = process.env.INGEST_KEY;
+    if (!defaultKey) {
+      throw new Error('INGEST_KEY environment variable is not set');
+    }
     sqlite.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('ingest_key', defaultKey);
     console.log('Inserted default ingest key:', defaultKey);
   }
