@@ -17,7 +17,7 @@ export interface Stream {
 export function generateConfig(template: string, streams: Stream[]): string {
   const pushLines = streams
     .filter(s => s.enabled)
-    .map(s => `            push ${s.rtmpUrl}/${s.streamKey};`)
+    .map(s => `            push "${s.rtmpUrl}/${s.streamKey}";`)
     .join('\n');
 
   return template.replace('{{PUSH_DESTINATIONS}}', pushLines || '            # No destinations configured');
