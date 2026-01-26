@@ -10,6 +10,7 @@ services:
       - "3000:3000"
       - "1935:1935"
       - "8080:8080"
+      - "9229:9229"
     environment:
       - NODE_ENV=development
       - DATABASE_PATH=/app/data/db.sqlite
