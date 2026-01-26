@@ -25,26 +25,6 @@ export function writeConfig(config: string): void {
   fs.writeFileSync(NGINX_CONFIG_PATH, config, 'utf-8');
 }
 
-export function validateConfig(): { valid: boolean; error?: string } {
-  try {
-    execSync(`nginx -t -c ${NGINX_CONFIG_PATH}`, { stdio: 'pipe' });
-    return { valid: true };
-  } catch (error: any) {
-    const stderr = error.stderr?.toString() || '';
-    const stdout = error.stdout?.toString() || '';
-    return { 
-      valid: false, 
-      error: (stderr + '\n' + stdout).trim() || error.message 
-    };
-  }
-}
-
-export function spawnNginx(): void {
-  // Now just a reload alias as Nginx is started by entrypoint
-  console.log('Use reloadNginx instead of spawnNginx in this architecture');
-  reloadNginx();
-}
-
 export function reloadNginx(): boolean {
   if (!isNginxRunning()) {
     console.log('Nginx not running (no PID file), cannot reload');

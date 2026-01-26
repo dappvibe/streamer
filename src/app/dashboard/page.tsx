@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { signOut } from '@/lib/auth-client';
-import { useRouter } from 'next/navigation';
+import { Shell } from '@/components/Shell';
 
 interface Stream {
   id: number;
@@ -14,7 +12,6 @@ interface Stream {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
   const [streams, setStreams] = useState<Stream[]>([]);
   const [stats, setStats] = useState<string | null>(null);
   const [config, setConfig] = useState<string | null>(null);
@@ -119,32 +116,8 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLogout = async () => {
-    await signOut();
-    router.push('/login');
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
-      <nav className="border-b border-slate-700 bg-slate-800/50 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Streamer Admin
-          </h1>
-          <div className="flex gap-4 items-center">
-            <Link href="/settings" className="text-slate-300 hover:text-white transition">
-              Settings
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="text-slate-400 hover:text-white transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
-
+    <Shell>
       <main className="max-w-6xl mx-auto px-4 py-8">
         {message && (
           <div className={`mb-6 p-4 rounded-lg ${message.includes('Error') ? 'bg-red-500/20 border border-red-500/50' : 'bg-green-500/20 border border-green-500/50'}`}>
@@ -273,6 +246,6 @@ export default function DashboardPage() {
           )}
         </section>
       </main>
-    </div>
+    </Shell>
   );
 }
