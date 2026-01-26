@@ -51,12 +51,8 @@ http {
 EOF
 
 echo "Starting Node.js app..."
-if [ "$NODE_ENV" = "development" ]; then
-    npm run dev &
-else
-    npm start &
-fi
-sleep 2
+npm run dev &
+sleep 5
 
 if [ ! -f /data/db.sqlite ]; then
   echo "Initializing database..."
