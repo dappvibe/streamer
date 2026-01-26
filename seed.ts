@@ -18,7 +18,6 @@ rtmp {
 
         application {{INGEST_KEY}} {
             live on;
-            on_publish http://127.0.0.1:3000/api/auth/stream;
 
 {{PUSH_DESTINATIONS}}
         }
