@@ -11,6 +11,4 @@ if [ ! -f /data/db.sqlite ]; then
   npx tsx seed.ts
 fi
 
-# Start Next.js (which will spawn nginx internally when Apply is clicked)
-echo "Starting Next.js server..."
-exec node
+exec npm run dev
