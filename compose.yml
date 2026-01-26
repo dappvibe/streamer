@@ -2,10 +2,9 @@ services:
   app:
     build:
       context: .
-      target: dev
     volumes:
       - .:/app
-      - ./data:/app/data
+      - ./data:/data
     ports:
       - "3000:3000"
       - "1935:1935"
@@ -13,5 +12,5 @@ services:
       - "9229:9229"
     environment:
       - NODE_ENV=development
-      - DATABASE_PATH=/app/data/db.sqlite
-    entrypoint: /app/entrypoint.sh
+      - DATABASE_PATH=/data/db.sqlite
+    entrypoint: /entrypoint.sh

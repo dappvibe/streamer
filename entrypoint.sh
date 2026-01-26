@@ -3,7 +3,10 @@ set -e
 
 echo "Starting Streamer Admin..."
 
-# Run seed to ensure database is initialized
+# Create /data directory if it doesn't exist
+mkdir -p /data
+
+# Check if we are in app directory
 cd /app
 
 # Create initial minimal nginx config if not exists
@@ -43,7 +46,11 @@ http {
 EOF
 
 echo "Starting Node.js app..."
-npm run dev &
+if [ "$NODE_ENV" = "development" ]; then
+    npm run dev &
+else
+    npm start &
+fi
 sleep 2
 
 if [ ! -f /data/db.sqlite ]; then
