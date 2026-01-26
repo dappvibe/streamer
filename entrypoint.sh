@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+if [ -z "$INGEST_KEY" ]; then
+  echo "Error: INGEST_KEY environment variable is not set."
+  exit 1
+fi
+
 echo "Starting Streamer Admin..."
 
 # Create /data directory if it doesn't exist
