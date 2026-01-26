@@ -18,17 +18,22 @@ RUN npm ci
 # Copy app source
 COPY . .
 
+# Ensure /data directory and declare volume
+# Must exist before build because generic db access might trigger
+RUN mkdir -p /data
+
+# Environment variables needed for build
+ENV DATABASE_PATH=/data/db.sqlite
+
 # Build the application
 RUN npm run build
 
-# Ensure /data directory and declare volume
-RUN mkdir -p /data
-VOLUME ["/data"]
-
-# Environment variables
+# Runtime Environment variables
 ENV NODE_ENV=production
-ENV DATABASE_PATH=/data/db.sqlite
 ENV PORT=3000
+
+# Declare volume
+VOLUME ["/data"]
 
 # Expose ports
 EXPOSE 3000 1935 8080
