@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [streams, setStreams] = useState<Stream[]>([]);
   const [stats, setStats] = useState<string | null>(null);
+  const [config, setConfig] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [message, setMessage] = useState('');
@@ -31,6 +32,7 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchStreams();
     fetchStats();
+    fetchConfig();
   }, []);
 
   const fetchStreams = async () => {
@@ -54,6 +56,18 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error('Failed to fetch stats:', error);
+    }
+  };
+
+  const fetchConfig = async () => {
+    try {
+      const res = await fetch('/api/nginx/config');
+      if (res.ok) {
+        const data = await res.json();
+        setConfig(data.config);
+      }
+    } catch (error) {
+      console.error('Failed to fetch config:', error);
     }
   };
 
@@ -94,6 +108,7 @@ export default function DashboardPage() {
       if (res.ok) {
         setMessage('Config applied and nginx reloaded');
         fetchStats();
+        fetchConfig();
       } else {
         setMessage(`Error: ${data.error}`);
       }
@@ -235,6 +250,26 @@ export default function DashboardPage() {
             </pre>
           ) : (
             <p className="text-slate-400">Nginx not running or stats unavailable</p>
+          )}
+        </section>
+
+        {/* Current Config */}
+        <section className="mt-8 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Current Nginx Config</h2>
+            <button
+              onClick={fetchConfig}
+              className="text-purple-400 hover:text-purple-300 transition"
+            >
+              Refresh
+            </button>
+          </div>
+          {config ? (
+            <pre className="text-xs text-slate-300 bg-slate-900/50 p-4 rounded-lg overflow-x-auto max-h-96">
+              {config}
+            </pre>
+          ) : (
+            <p className="text-slate-400">Config not available</p>
           )}
         </section>
       </main>

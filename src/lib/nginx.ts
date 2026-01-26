@@ -79,3 +79,10 @@ export function isNginxRunning(): boolean {
 export function getNginxConfigPath(): string {
   return NGINX_CONFIG_PATH;
 }
+
+export function readConfig(): string | null {
+  if (!fs.existsSync(NGINX_CONFIG_PATH)) {
+    return null;
+  }
+  return fs.readFileSync(NGINX_CONFIG_PATH, 'utf-8');
+}

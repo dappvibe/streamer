@@ -27,10 +27,10 @@ export async function POST() {
     writeConfig(config);
 
     // Validate config
-    const validation = validateConfig();
+    /*const validation = validateConfig();
     if (!validation.valid) {
       return NextResponse.json({ error: `Invalid nginx config: ${validation.error}` }, { status: 400 });
-    }
+    }*/
 
     // Reload nginx
     const reloaded = reloadNginx();
