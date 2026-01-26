@@ -1,7 +1,7 @@
 import { db, schema } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { generateConfig, writeConfig, validateConfig, reloadNginx, spawnNginx, isNginxRunning } from '@/lib/nginx';
+import { generateConfig, writeConfig, reloadNginx } from '@/lib/nginx';
 
 export async function POST() {
   try {
@@ -25,12 +25,6 @@ export async function POST() {
 
     // Write config to file
     writeConfig(config);
-
-    // Validate config
-    /*const validation = validateConfig();
-    if (!validation.valid) {
-      return NextResponse.json({ error: `Invalid nginx config: ${validation.error}` }, { status: 400 });
-    }*/
 
     // Reload nginx
     const reloaded = reloadNginx();
