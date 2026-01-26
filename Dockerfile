@@ -3,7 +3,7 @@ FROM tiangolo/nginx-rtmp:latest
 
 # Install dependencies including Node.js 20
 RUN apt-get update && \
-    apt-get install -y curl && \
+    apt-get install -y curl certbot openssl && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
@@ -24,16 +24,16 @@ RUN mkdir -p /data
 
 # Environment variables needed for build
 ENV DATABASE_PATH=/data/db.sqlite
+ENV NODE_ENV=development
 
 # Runtime Environment variables
-ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=443
 
 # Declare volume
 VOLUME ["/data"]
 
 # Expose ports
-EXPOSE 3000 1935 8080
+EXPOSE 1935 8080 80 443
 
 # Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh

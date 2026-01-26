@@ -44,7 +44,7 @@ http {
 
 async function seed() {
   const dbPath = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'db.sqlite');
-  
+
   // Ensure data directory exists
   const dataDir = path.dirname(dbPath);
   if (!fs.existsSync(dataDir)) {
@@ -141,18 +141,18 @@ async function seed() {
   }
 
   sqlite.close();
-  
+
   // Create admin user via Better Auth API
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost';
+
   console.log(`Creating admin user via API: ${adminEmail}`);
-  
+
   try {
     const response = await fetch(`${appUrl}/api/auth/sign-up/email`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Origin': appUrl,
       },
@@ -162,7 +162,7 @@ async function seed() {
         password: adminPassword,
       }),
     });
-    
+
     if (response.ok) {
       console.log('Admin user created successfully');
     } else {
