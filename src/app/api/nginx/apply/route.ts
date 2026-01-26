@@ -32,11 +32,10 @@ export async function POST() {
       return NextResponse.json({ error: `Invalid nginx config: ${validation.error}` }, { status: 400 });
     }
 
-    // Reload or spawn nginx
-    if (isNginxRunning()) {
-      reloadNginx();
-    } else {
-      spawnNginx();
+    // Reload nginx
+    const reloaded = reloadNginx();
+    if (!reloaded) {
+      return NextResponse.json({ error: 'Failed to reload Nginx (is it running?)' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, config });

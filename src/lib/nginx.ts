@@ -1,10 +1,8 @@
-import { spawn, ChildProcess, execSync } from 'child_process';
+import { execSync } from 'child_process';
 import * as fs from 'fs';
-import * as path from 'path';
-
-let nginxProcess: ChildProcess | null = null;
 
 const NGINX_CONFIG_PATH = '/tmp/nginx-rtmp.conf';
+const NGINX_PID_PATH = '/tmp/nginx.pid';
 
 export interface Stream {
   id: number;
@@ -41,34 +39,22 @@ export function validateConfig(): { valid: boolean; error?: string } {
   }
 }
 
-export function spawnNginx(): ChildProcess {
-  if (nginxProcess) {
-    console.log('Nginx already running');
-    return nginxProcess;
-  }
-
-  nginxProcess = spawn('nginx', ['-c', NGINX_CONFIG_PATH, '-g', 'daemon off;'], {
-    stdio: 'inherit',
-  });
-
-  nginxProcess.on('exit', (code) => {
-    console.log(`Nginx exited with code ${code}`);
-    nginxProcess = null;
-  });
-
-  return nginxProcess;
+export function spawnNginx(): void {
+  // Now just a reload alias as Nginx is started by entrypoint
+  console.log('Use reloadNginx instead of spawnNginx in this architecture');
+  reloadNginx();
 }
 
 export function reloadNginx(): boolean {
-  if (!nginxProcess || !nginxProcess.pid) {
-    console.log('Nginx not running, spawning new instance');
-    spawnNginx();
-    return true;
+  if (!isNginxRunning()) {
+    console.log('Nginx not running (no PID file), cannot reload');
+    return false;
   }
 
   try {
-    process.kill(nginxProcess.pid, 'SIGHUP');
-    console.log('Sent SIGHUP to nginx');
+    const pid = fs.readFileSync(NGINX_PID_PATH, 'utf-8').trim();
+    process.kill(parseInt(pid, 10), 'SIGHUP');
+    console.log(`Sent SIGHUP to nginx (PID: ${pid})`);
     return true;
   } catch (error) {
     console.error('Failed to reload nginx:', error);
@@ -77,7 +63,17 @@ export function reloadNginx(): boolean {
 }
 
 export function isNginxRunning(): boolean {
-  return nginxProcess !== null && nginxProcess.exitCode === null;
+  if (!fs.existsSync(NGINX_PID_PATH)) {
+    return false;
+  }
+  try {
+    const pid = fs.readFileSync(NGINX_PID_PATH, 'utf-8').trim();
+    // Check if process exists
+    process.kill(parseInt(pid, 10), 0);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 export function getNginxConfigPath(): string {
