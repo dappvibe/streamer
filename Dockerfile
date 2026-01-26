@@ -3,7 +3,7 @@ FROM tiangolo/nginx-rtmp:latest
 
 # Install dependencies including Node.js 20
 RUN apt-get update && \
-    apt-get install -y curl python3 make g++ && \
+    apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
