@@ -1,6 +1,16 @@
 #!/bin/sh
+set -e
 
-envsubst '${INGEST_KEY} ${TWITCH_STREAM_KEY} ${TWITTER_STREAM_KEY} ${TELEGRAM_STREAM_KEY} ${YOUTUBE_STREAM_KEY}' \
-  < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+echo "Starting Streamer Admin..."
 
-exec nginx -g 'daemon off;'
+# Run seed to ensure database is initialized
+cd /app
+if [ ! -f /data/db.sqlite ]; then
+  echo "Initializing database..."
+  # Takes username/password from env
+  npx tsx seed.ts
+fi
+
+# Start Next.js (which will spawn nginx internally when Apply is clicked)
+echo "Starting Next.js server..."
+exec node
