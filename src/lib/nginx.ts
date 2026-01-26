@@ -27,12 +27,17 @@ export function writeConfig(config: string): void {
   fs.writeFileSync(NGINX_CONFIG_PATH, config, 'utf-8');
 }
 
-export function validateConfig(): boolean {
+export function validateConfig(): { valid: boolean; error?: string } {
   try {
     execSync(`nginx -t -c ${NGINX_CONFIG_PATH}`, { stdio: 'pipe' });
-    return true;
-  } catch {
-    return false;
+    return { valid: true };
+  } catch (error: any) {
+    const stderr = error.stderr?.toString() || '';
+    const stdout = error.stdout?.toString() || '';
+    return { 
+      valid: false, 
+      error: (stderr + '\n' + stdout).trim() || error.message 
+    };
   }
 }
 
