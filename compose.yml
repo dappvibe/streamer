@@ -10,6 +10,8 @@ services:
     environment:
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - SSL_KEY_PATH=/app/data/live/privkey.pem
+      - SSL_CERT_PATH=/app/data/live/cer.pem
     ports:
       - "80:80"
       - "443:443"
