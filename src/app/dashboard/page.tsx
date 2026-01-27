@@ -100,7 +100,7 @@ export default function DashboardPage() {
     // Optimistic update
     const newEnabled = currentEnabled ? 0 : 1;
     setStreams(streams.map(s => s.id === id ? { ...s, enabled: newEnabled } : s));
-    
+
     try {
       const stream = streams.find(s => s.id === id);
       if (!stream) return;
@@ -110,10 +110,10 @@ export default function DashboardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...stream, enabled: newEnabled }),
       });
-      
+
       if (!res.ok) {
         // Revert on failure
-        setStreams(streams.map(s => s.id === id ? { ...s, enabled: currentEnabled } : s)); 
+        setStreams(streams.map(s => s.id === id ? { ...s, enabled: currentEnabled } : s));
         setMessage('Failed to update stream status');
       }
     } catch (error) {
@@ -216,8 +216,8 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center gap-4">
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           className="sr-only peer"
                           checked={!!stream.enabled}
                           onChange={() => toggleStream(stream.id, stream.enabled)}
@@ -227,7 +227,7 @@ export default function DashboardPage() {
                       <div>
                         <p className={`font-medium ${!stream.enabled ? 'text-slate-500 line-through' : ''}`}>{stream.name}</p>
                         <p className="text-sm text-slate-400 truncate max-w-xs">
-                          {stream.rtmpUrl} / ••••••••
+                          {stream.rtmpUrl}
                         </p>
                       </div>
                     </div>
