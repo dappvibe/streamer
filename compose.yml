@@ -4,16 +4,14 @@ services:
       context: .
     volumes:
       - .:/app
-      - ./data:/data
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
     ports:
       - "80:80"
       - "443:443"
       - "1935:1935"
       - "8080:8080"
-      - "9229:9229"
-    environment:
-      - NODE_ENV=development
-      - DATABASE_PATH=/data/db.sqlite
-      - NEXT_PUBLIC_APP_URL=https://example.com
-      - EMAIL=admin@example.com
     entrypoint: /entrypoint.sh

@@ -1,19 +1,6 @@
 #!/bin/sh
 set -e
 
-if [ -z "$INGEST_KEY" ]; then
-  echo "Error: INGEST_KEY environment variable is not set."
-  exit 1
-fi
-
-echo "Starting Streamer Admin..."
-
-# Create /data directory if it doesn't exist
-mkdir -p /data
-
-# Check if we are in app directory
-cd /app
-
 # Create initial minimal nginx config if not exists
 cat > /tmp/nginx-rtmp.conf <<EOF
 worker_processes auto;
@@ -73,7 +60,7 @@ fi
 # Extract domain from NEXT_PUBLIC_APP_URL (remove protocol and port)
 DOMAIN=$(echo "$NEXT_PUBLIC_APP_URL" | sed -e 's|^[^/]*//||' -e 's|:.*$||' -e 's|/.*$||')
 
-if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "localhost" ] && [ -n "$EMAIL" ]; then
+if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "localhost" ] && [ -n "$ADMIN_EMAIL" ]; then
     echo "Configuring Let's Encrypt for $DOMAIN..."
 
     if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
@@ -83,7 +70,7 @@ if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "localhost" ] && [ -n "$EMAIL" ]; then
     else
         echo "Obtaining new certificates..."
         # Run certbot in standalone mode (uses port 80)
-        if certbot certonly --standalone -d "$DOMAIN" --email "$EMAIL" --agree-tos --non-interactive; then
+        if certbot certonly --standalone -d "$DOMAIN" --email "$ADMIN_EMAIL" --agree-tos --non-interactive; then
             echo "Certificate obtained successfully."
             export SSL_KEY_PATH="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
             export SSL_CERT_PATH="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
@@ -102,13 +89,6 @@ fi
 echo "Starting Node.js app on port 443..."
 npm run dev &
 sleep 5
-
-if [ ! -f /data/db.sqlite ]; then
-  echo "Initializing database..."
-  # Takes username/password from env
-  npx tsx seed.ts
-fi
-
 
 echo "Starting Nginx..."
 exec nginx -c /tmp/nginx-rtmp.conf

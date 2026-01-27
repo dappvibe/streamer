@@ -11,32 +11,12 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /app
 
-# Install app dependencies
-COPY package*.json ./
-RUN npm ci
-
-# Copy app source
-COPY . .
-
-# Ensure /data directory and declare volume
-# Must exist before build because generic db access might trigger
-RUN mkdir -p /data
-
-# Environment variables needed for build
 ENV DATABASE_PATH=/data/db.sqlite
-ENV NODE_ENV=development
-
-# Runtime Environment variables
 ENV PORT=443
-
-# Declare volume
-VOLUME ["/data"]
-
-# Expose ports
-EXPOSE 1935 8080 80 443
 
 # Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+WORKDIR /app
 CMD ["/entrypoint.sh"]
