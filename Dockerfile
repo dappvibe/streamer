@@ -14,8 +14,6 @@ WORKDIR /app
 ENV DATABASE_PATH=/data/db.sqlite
 ENV PORT=443
 
-RUN npm ci
-
 # Setup entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
