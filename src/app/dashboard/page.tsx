@@ -96,6 +96,33 @@ export default function DashboardPage() {
     }
   };
 
+  const toggleStream = async (id: number, currentEnabled: number | null) => {
+    // Optimistic update
+    const newEnabled = currentEnabled ? 0 : 1;
+    setStreams(streams.map(s => s.id === id ? { ...s, enabled: newEnabled } : s));
+    
+    try {
+      const stream = streams.find(s => s.id === id);
+      if (!stream) return;
+
+      const res = await fetch(`/api/streams/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...stream, enabled: newEnabled }),
+      });
+      
+      if (!res.ok) {
+        // Revert on failure
+        setStreams(streams.map(s => s.id === id ? { ...s, enabled: currentEnabled } : s)); 
+        setMessage('Failed to update stream status');
+      }
+    } catch (error) {
+       // Revert on failure
+       setStreams(streams.map(s => s.id === id ? { ...s, enabled: currentEnabled } : s));
+       setMessage('Failed to update stream status');
+    }
+  };
+
   const applyConfig = async () => {
     setApplying(true);
     setMessage('');
@@ -187,11 +214,22 @@ export default function DashboardPage() {
                     key={stream.id}
                     className="flex justify-between items-center p-4 bg-slate-900/50 rounded-lg border border-slate-600"
                   >
-                    <div>
-                      <p className="font-medium">{stream.name}</p>
-                      <p className="text-sm text-slate-400 truncate max-w-xs">
-                        {stream.rtmpUrl}
-                      </p>
+                    <div className="flex items-center gap-4">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer"
+                          checked={!!stream.enabled}
+                          onChange={() => toggleStream(stream.id, stream.enabled)}
+                        />
+                        <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all border-gray-600 peer-checked:bg-purple-600"></div>
+                      </label>
+                      <div>
+                        <p className={`font-medium ${!stream.enabled ? 'text-slate-500 line-through' : ''}`}>{stream.name}</p>
+                        <p className="text-sm text-slate-400 truncate max-w-xs">
+                          {stream.rtmpUrl}
+                        </p>
+                      </div>
                     </div>
                     <button
                       onClick={() => deleteStream(stream.id)}

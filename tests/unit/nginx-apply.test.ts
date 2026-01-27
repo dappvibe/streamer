@@ -6,13 +6,12 @@ import { db } from '@/lib/db';
 vi.mock('@/lib/nginx', () => ({
   generateConfig: vi.fn().mockReturnValue('mock-config'),
   writeConfig: vi.fn(),
-  validateConfig: vi.fn().mockReturnValue({ valid: true }),
   reloadNginx: vi.fn().mockReturnValue(true),
   spawnNginx: vi.fn(),
   isNginxRunning: vi.fn().mockReturnValue(true),
 }));
 
-import { generateConfig, reloadNginx, validateConfig } from '@/lib/nginx';
+import { generateConfig, reloadNginx } from '@/lib/nginx';
 
 // Mock DB
 vi.mock('@/lib/db', () => {
@@ -46,7 +45,6 @@ describe('POST /api/nginx/apply', () => {
 
         // Reset nginx mocks defaults
         vi.mocked(reloadNginx).mockReturnValue(true);
-        vi.mocked(validateConfig).mockReturnValue({ valid: true });
     });
 
     it('should apply config successfully', async () => {
