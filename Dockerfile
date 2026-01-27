@@ -11,6 +11,11 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /app
 
+
+# Install app dependencies
+COPY package.json package-lock.json ./
+RUN npm install
+
 ENV DATABASE_PATH=/data/db.sqlite
 ENV PORT=443
 
