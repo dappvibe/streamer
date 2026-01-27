@@ -143,6 +143,8 @@ export default function DashboardPage() {
     }
   };
 
+  const [showConfig, setShowConfig] = useState(false);
+
   return (
     <Shell>
       <main className="max-w-6xl mx-auto px-4 py-8">
@@ -266,21 +268,41 @@ export default function DashboardPage() {
 
         {/* Current Config */}
         <section className="mt-8 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Current Nginx Config</h2>
-            <button
-              onClick={fetchConfig}
-              className="text-purple-400 hover:text-purple-300 transition"
-            >
-              Refresh
-            </button>
+          <div 
+            className="flex justify-between items-center mb-4 cursor-pointer select-none" 
+            onClick={() => setShowConfig(!showConfig)}
+          >
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold">Current Nginx Config</h2>
+              <svg 
+                className={`w-5 h-5 transition-transform ${showConfig ? 'rotate-180' : ''}`} 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            {showConfig && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fetchConfig();
+                }}
+                className="text-purple-400 hover:text-purple-300 transition"
+              >
+                Refresh
+              </button>
+            )}
           </div>
-          {config ? (
-            <pre className="text-xs text-slate-300 bg-slate-900/50 p-4 rounded-lg overflow-x-auto max-h-96">
-              {config}
-            </pre>
-          ) : (
-            <p className="text-slate-400">Config not available</p>
+          {showConfig && (
+            config ? (
+              <pre className="text-xs text-slate-300 bg-slate-900/50 p-4 rounded-lg overflow-x-auto max-h-96 animate-in fade-in duration-300">
+                {config}
+              </pre>
+            ) : (
+              <p className="text-slate-400">Config not available</p>
+            )
           )}
         </section>
       </main>
