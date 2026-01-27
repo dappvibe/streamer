@@ -174,7 +174,7 @@ export default function DashboardPage() {
                 required
               />
               <input
-                type="text"
+                type="password"
                 placeholder="Stream Key"
                 value={newStream.streamKey}
                 onChange={(e) => setNewStream({ ...newStream, streamKey: e.target.value })}
@@ -227,7 +227,7 @@ export default function DashboardPage() {
                       <div>
                         <p className={`font-medium ${!stream.enabled ? 'text-slate-500 line-through' : ''}`}>{stream.name}</p>
                         <p className="text-sm text-slate-400 truncate max-w-xs">
-                          {stream.rtmpUrl}
+                          {stream.rtmpUrl} / ••••••••
                         </p>
                       </div>
                     </div>
