@@ -2,4 +2,4 @@
 ffmpeg -re -i $1 \
        -c:v libx264 -preset veryfast -b:v 2500k \
        -c:a aac -b:a 128k \
-       -f "$2"
+       -f flv "$2"
