@@ -20,7 +20,18 @@ export function generateConfig(template: string, streams: Stream[]): string {
 
   const pushLines = streams
     .filter(s => s.enabled)
-    .map(s => `            push "${s.rtmpUrl}/${s.streamKey}";`)
+    .map(s => {
+      let url = s.rtmpUrl;
+      if (url.endsWith('/')) {
+        url = url.slice(0, -1);
+      }
+      
+      if (url.startsWith('rtmps://')) {
+        // Use FFmpeg for RTMPS destinations (zero-copy)
+        return `            exec_push ffmpeg -i rtmp://127.0.0.1:1935/$app/$name -c copy -f flv "${url}/${s.streamKey}";`;
+      }
+      return `            push "${url}/${s.streamKey}";`;
+    })
     .join('\n');
 
   let config = template.replace('{{PUSH_DESTINATIONS}}', pushLines || '            # No destinations configured');
