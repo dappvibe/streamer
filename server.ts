@@ -19,49 +19,42 @@ const app = next({ dev, hostname, port: httpPort });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
-  // HTTP Server (Port 80)
-  createHttpServer(async (req, res) => {
+  const requestHandler = async (req: any, res: any) => {
     try {
-      // @ts-ignore
-      const parsedUrl = parse(req.url, true);
+      const parsedUrl = parse(req.url!, true);
+      const { pathname } = parsedUrl;
+
+      // Bot Routes (available on both HTTP and HTTPS)
+      if (pathname === '/bot/telegramUpdate' && req.method === 'POST') {
+        await telegramBotModule.webhookHandler.handleRequest(req, res);
+        return;
+      }
+      if (pathname === '/bot/chatlog' && req.method === 'GET') {
+        telegramBotModule.chatRelay.handleChatRequest(req, res);
+        return;
+      }
+
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error('Error occurred handling', req.url, err);
       res.statusCode = 500;
       res.end('internal server error');
     }
-  }).listen(httpPort, () => {
+  };
+
+  // HTTP Server (Port 80)
+  createHttpServer(requestHandler).listen(httpPort, () => {
     console.log(`> HTTP Ready on http://${hostname}:${httpPort}`);
   });
 
   // HTTPS Server (Port 443)
   if (fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
     const httpsOptions = {
-        key: fs.readFileSync(sslKeyPath),
-        cert: fs.readFileSync(sslCertPath),
+      key: fs.readFileSync(sslKeyPath),
+      cert: fs.readFileSync(sslCertPath),
     };
-    createHttpsServer(httpsOptions, async (req, res) => {
-        try {
-        // Telegram Bot Routes
-        if (req.url === '/bot/telegramUpdate' && req.method === 'POST') {
-          await telegramBotModule.webhookHandler.handleRequest(req, res);
-          return;
-        }
-        if (req.url === '/bot/chatlog' && req.method === 'GET') {
-          telegramBotModule.chatRelay.handleChatRequest(req, res);
-          return;
-        }
-
-        // @ts-ignore
-        const parsedUrl = parse(req.url, true);
-        await handle(req, res, parsedUrl);
-        } catch (err) {
-        console.error('Error occurred handling', req.url, err);
-        res.statusCode = 500;
-        res.end('internal server error');
-        }
-    }).listen(httpsPort, () => {
-        console.log(`> HTTPS Ready on https://${hostname}:${httpsPort}`);
+    createHttpsServer(httpsOptions, requestHandler).listen(httpsPort, () => {
+      console.log(`> HTTPS Ready on https://${hostname}:${httpsPort}`);
     });
   } else {
     console.warn("SSL certificates not found, skipping HTTPS server.");
