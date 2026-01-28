@@ -38,19 +38,14 @@ http {
 EOF
 
 # SSL Configuration
-# Ensure /data directories exist
-mkdir -p /data/certificates
-mkdir -p /data/letsencrypt
+# Ensure /app/data/ssl exists for persistent certificates
+mkdir -p /app/data/ssl
 
-# Persist Let's Encrypt config to data volume
-if [ ! -L /etc/letsencrypt ]; then
-    rm -rf /etc/letsencrypt
-    ln -s /data/letsencrypt /etc/letsencrypt
-fi
 
-# Set default SSL paths
-export SSL_KEY_PATH="/data/certificates/key.pem"
-export SSL_CERT_PATH="/data/certificates/cert.pem"
+
+# Set default self-signed paths (in root of ssl dir to avoid conflict with certbot subdirs)
+export SSL_KEY_PATH="/app/data/ssl/privkey.pem"
+export SSL_CERT_PATH="/app/data/ssl/fullchain.pem"
 
 if [ -z "$NEXT_PUBLIC_APP_URL" ]; then
     echo "Error: NEXT_PUBLIC_APP_URL environment variable is not set."
@@ -63,17 +58,19 @@ DOMAIN=$(echo "$NEXT_PUBLIC_APP_URL" | sed -e 's|^[^/]*//||' -e 's|:.*$||' -e 's
 if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "localhost" ] && [ -n "$ADMIN_EMAIL" ]; then
     echo "Configuring Let's Encrypt for $DOMAIN..."
 
-    if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+    if [ -d "/app/data/ssl/live/$DOMAIN" ]; then
         echo "Existing certificates found."
-        export SSL_KEY_PATH="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
-        export SSL_CERT_PATH="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+        export SSL_KEY_PATH="/app/data/ssl/live/$DOMAIN/privkey.pem"
+        export SSL_CERT_PATH="/app/data/ssl/live/$DOMAIN/fullchain.pem"
     else
         echo "Obtaining new certificates..."
         # Run certbot in standalone mode (uses port 80)
-        if certbot certonly --standalone -d "$DOMAIN" --email "$ADMIN_EMAIL" --agree-tos --non-interactive; then
+        # Use persistent data directory /app/data/ssl
+        if certbot certonly --standalone -d "$DOMAIN" --email "$ADMIN_EMAIL" --agree-tos --non-interactive \
+            --config-dir /app/data/ssl; then
             echo "Certificate obtained successfully."
-            export SSL_KEY_PATH="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
-            export SSL_CERT_PATH="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+            export SSL_KEY_PATH="/app/data/ssl/live/$DOMAIN/privkey.pem"
+            export SSL_CERT_PATH="/app/data/ssl/live/$DOMAIN/fullchain.pem"
         else
             echo "Certbot failed. Falling back to self-signed certificate."
         fi

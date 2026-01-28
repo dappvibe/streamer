@@ -16,7 +16,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-ENV DATABASE_PATH=/data/db.sqlite
+ENV DATABASE_PATH=/app/data/db.sqlite
 ENV PORT=443
 
 # Setup entrypoint

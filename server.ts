@@ -12,8 +12,8 @@ const httpPort = 80;
 const httpsPort = 443;
 
 // Environment variables for SSL paths
-const sslKeyPath = process.env.SSL_KEY_PATH || '/data/certificates/key.pem';
-const sslCertPath = process.env.SSL_CERT_PATH || '/data/certificates/cert.pem';
+const sslKeyPath = process.env.SSL_KEY_PATH || '/app/data/certificates/key.pem';
+const sslCertPath = process.env.SSL_CERT_PATH || '/app/data/certificates/cert.pem';
 
 const app = next({ dev, hostname, port: httpPort });
 const handle = app.getRequestHandler();
@@ -22,16 +22,6 @@ app.prepare().then(() => {
   // HTTP Server (Port 80)
   createHttpServer(async (req, res) => {
     try {
-      // Telegram Bot Routes
-      if (req.url === '/bot/telegramUpdate' && req.method === 'POST') {
-        await telegramBotModule.webhookHandler.handleRequest(req, res);
-        return;
-      }
-      if (req.url === '/bot/chatlog' && req.method === 'GET') {
-        telegramBotModule.chatRelay.handleChatRequest(req, res);
-        return;
-      }
-
       // @ts-ignore
       const parsedUrl = parse(req.url, true);
       await handle(req, res, parsedUrl);
@@ -52,6 +42,16 @@ app.prepare().then(() => {
     };
     createHttpsServer(httpsOptions, async (req, res) => {
         try {
+        // Telegram Bot Routes
+        if (req.url === '/bot/telegramUpdate' && req.method === 'POST') {
+          await telegramBotModule.webhookHandler.handleRequest(req, res);
+          return;
+        }
+        if (req.url === '/bot/chatlog' && req.method === 'GET') {
+          telegramBotModule.chatRelay.handleChatRequest(req, res);
+          return;
+        }
+
         // @ts-ignore
         const parsedUrl = parse(req.url, true);
         await handle(req, res, parsedUrl);
