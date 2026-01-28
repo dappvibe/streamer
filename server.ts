@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
+import { telegramBotModule } from './src/services/telegram';
 import { parse } from 'url';
 import next from 'next';
 import fs from 'fs';
@@ -21,6 +22,16 @@ app.prepare().then(() => {
   // HTTP Server (Port 80)
   createHttpServer(async (req, res) => {
     try {
+      // Telegram Bot Routes
+      if (req.url === '/bot/telegramUpdate' && req.method === 'POST') {
+        await telegramBotModule.webhookHandler.handleRequest(req, res);
+        return;
+      }
+      if (req.url === '/bot/chatlog' && req.method === 'GET') {
+        telegramBotModule.chatRelay.handleChatRequest(req, res);
+        return;
+      }
+
       // @ts-ignore
       const parsedUrl = parse(req.url, true);
       await handle(req, res, parsedUrl);
