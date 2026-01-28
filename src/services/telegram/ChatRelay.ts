@@ -31,6 +31,7 @@ export class ChatRelay {
 
         if (msg.text) {
             const html = this.formatMessageToHtml(msg.text, msg.entities);
+            console.log(`- event - Telegram message stored: "${msg.text.substring(0, 50)}${msg.text.length > 50 ? '...' : ''}" from ${msg.from?.username || msg.from?.first_name || 'Unknown'}`);
             this.messages.push(html);
             if (this.messages.length > this.MAX_MESSAGES) {
                 this.messages.shift();
