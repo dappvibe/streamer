@@ -29,6 +29,8 @@ export default function DashboardPage() {
   // Edit state
   const [editingStreamId, setEditingStreamId] = useState<number | null>(null);
   const [editingKey, setEditingKey] = useState('');
+  const [editingName, setEditingName] = useState('');
+  const [editingUrl, setEditingUrl] = useState('');
 
   useEffect(() => {
     fetchStreams();
@@ -150,33 +152,44 @@ export default function DashboardPage() {
   const startEditing = (stream: Stream) => {
     setEditingStreamId(stream.id);
     setEditingKey('');
+    setEditingName(stream.name);
+    setEditingUrl(stream.rtmpUrl);
   };
 
   const cancelEditing = () => {
     setEditingStreamId(null);
     setEditingKey('');
+    setEditingName('');
+    setEditingUrl('');
   };
 
-  const saveKey = async (id: number) => {
+  const saveStream = async (id: number) => {
     try {
       const stream = streams.find(s => s.id === id);
       if (!stream) return;
 
+      const updatedStream = {
+        ...stream,
+        name: editingName,
+        rtmpUrl: editingUrl,
+        streamKey: editingKey || stream.streamKey // Keep old key if empty
+      };
+
       const res = await fetch(`/api/streams/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...stream, streamKey: editingKey }),
+        body: JSON.stringify(updatedStream),
       });
 
       if (res.ok) {
-        setStreams(streams.map(s => s.id === id ? { ...s, streamKey: editingKey } : s));
-        setMessage('Stream key updated');
+        setStreams(streams.map(s => s.id === id ? updatedStream : s));
+        setMessage('Stream updated');
         cancelEditing();
       } else {
-        setMessage('Failed to update stream key');
+        setMessage('Failed to update stream');
       }
     } catch (error) {
-      setMessage('Failed to update stream key');
+      setMessage('Failed to update stream');
     }
   };
 
@@ -265,10 +278,31 @@ export default function DashboardPage() {
                         <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all border-gray-600 peer-checked:bg-purple-600"></div>
                       </label>
                       <div>
-                        <p className={`font-medium ${!stream.enabled ? 'text-slate-500 line-through' : ''}`}>{stream.name}</p>
-                        <p className="text-sm text-slate-400 truncate max-w-xs mb-1">
-                          {stream.rtmpUrl}
-                        </p>
+                        {editingStreamId === stream.id ? (
+                          <div className="space-y-2 mb-2">
+                             <input
+                                type="text"
+                                value={editingName}
+                                onChange={(e) => setEditingName(e.target.value)}
+                                className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-white focus:outline-none focus:ring-1 focus:ring-purple-500 font-medium"
+                                placeholder="Stream Name"
+                              />
+                              <input
+                                type="text"
+                                value={editingUrl}
+                                onChange={(e) => setEditingUrl(e.target.value)}
+                                className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-purple-500 font-mono"
+                                placeholder="RTMP URL"
+                              />
+                          </div>
+                        ) : (
+                          <>
+                            <p className={`font-medium ${!stream.enabled ? 'text-slate-500 line-through' : ''}`}>{stream.name}</p>
+                            <p className="text-sm text-slate-400 truncate max-w-xs mb-1">
+                              {stream.rtmpUrl}
+                            </p>
+                          </>
+                        )}
                         
                         <div className="flex items-center gap-2">
                           {editingStreamId === stream.id ? (
@@ -276,55 +310,66 @@ export default function DashboardPage() {
                               <input
                                 type="text"
                                 value={editingKey}
-                                placeholder="New stream key"
+                                placeholder="New stream key (optional)"
                                 onChange={(e) => setEditingKey(e.target.value)}
                                 className="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-white focus:outline-none focus:ring-1 focus:ring-purple-500 w-48"
-                                autoFocus
                               />
-                              <button
-                                onClick={() => saveKey(stream.id)}
-                                className="p-1 text-green-400 hover:text-green-300 transition"
-                                title="Save"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </button>
-                              <button
-                                onClick={cancelEditing}
-                                className="p-1 text-red-400 hover:text-red-300 transition"
-                                title="Cancel"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                </svg>
-                              </button>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2 group">
                               <span className="text-xs text-slate-500 font-mono">
                                 ••••••••
                               </span>
-                              <button
-                                onClick={() => startEditing(stream)}
-                                className="text-slate-500 hover:text-purple-400 opacity-0 group-hover:opacity-100 transition-all duration-200"
-                                title="Edit Stream Key"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                </svg>
-                              </button>
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => deleteStream(stream.id)}
-                      className="text-red-400 hover:text-red-300 transition"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {editingStreamId === stream.id ? (
+                        <>
+                           <button
+                              onClick={() => saveStream(stream.id)}
+                              className="p-1 text-green-400 hover:text-green-300 transition"
+                              title="Save"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="p-1 text-red-400 hover:text-red-300 transition"
+                              title="Cancel"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                        </>
+                      ) : (
+                        <>
+                           <button
+                              onClick={() => startEditing(stream)}
+                              className="p-1 text-slate-400 hover:text-purple-400 transition"
+                              title="Edit"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => deleteStream(stream.id)}
+                              className="p-1 text-red-400 hover:text-red-300 transition"
+                              title="Delete"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                        </>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
