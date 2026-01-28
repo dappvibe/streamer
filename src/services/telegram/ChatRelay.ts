@@ -26,6 +26,7 @@ export class ChatRelay {
         const configChatId = this.config.targetChatId.toString();
 
         if (msgChatId !== configChatId) {
+            console.log(`- event - Telegram message discarded: from chat ${msgChatId} (expected ${configChatId})`);
             return;
         }
 
