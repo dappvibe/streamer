@@ -7,7 +7,7 @@ import next from 'next';
 import fs from 'fs';
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
+const hostname = '0.0.0.0';
 const httpPort = 80;
 const httpsPort = 443;
 

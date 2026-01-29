@@ -13,6 +13,14 @@ export const auth = betterAuth({
       verification: authSchema.verification,
     },
   }),
+  trustedOrigins: [
+    process.env.NEXT_PUBLIC_APP_URL || '',
+    'https://live.dappvibe.com',
+    'http://localhost',
+    'http://localhost:3000',
+    'http://localhost:80',
+    'https://localhost',
+  ],
   emailAndPassword: {
     enabled: true,
   },
